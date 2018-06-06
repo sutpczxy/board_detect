@@ -235,8 +235,7 @@ int move_target_detect::send_img_socket(char status)
 	printf("---------save image------- \n");
 	const time_t t = time(NULL);
 	struct tm* current_time = localtime(&t);			
-	char Save_file_name[200] = { '\0' };
-	sprintf(Save_file_name, "./B_10000001_%04d%02d%02d%02d%02d%02d.jpg",
+	sprintf(Stored_file_name, "B_10000001_%04d%02d%02d%02d%02d%02d.jpg",
 		current_time->tm_year + 1900, current_time->tm_mon + 1, current_time->tm_mday, current_time->tm_hour, current_time->tm_min, current_time->tm_sec);			
 	Mat img_output;
 	if(status==0x01)
@@ -247,7 +246,7 @@ int move_target_detect::send_img_socket(char status)
 		int w4=int(img_input.rows*0.052);
 		rectangle(img_input, cv::Rect(w1, w2, w3, w4), CV_RGB(0, 255, 30), 3, 1, 0);
 	}
-	imwrite(Save_file_name, img_input);
+	imwrite(Stored_file_name, img_input);
 
 	/****************tftp operation*******************************/
 	// char Tftpcmd[200] = {'\0'};
@@ -387,7 +386,10 @@ Scalar move_target_detect::getMSSIM( const Mat& i1, const Mat& i2)
     return mssim; 
 }
 
-
+char* move_target_detect::Return_saved_file()
+{
+	return Stored_file_name;
+}
 move_target_detect::~move_target_detect()
 {
 	printf("delete target");

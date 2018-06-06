@@ -26,6 +26,7 @@ public:
 	int send_img_socket(char status);
 	double getPSNR(cv::Mat temp_img, cv::Mat curr_img);
 	Scalar getMSSIM( const Mat& i1, const Mat& i2);
+	char* Return_saved_file();
 private:
 	
 	// IBGS *bgs;							//subsense方法
@@ -33,10 +34,12 @@ private:
 	cv::Mat img_temp;				//template frame
 	int frame_count;					//帧计数
 	int alert_count;					//alert count
+	int disappear_count;					//disappear count
 	int start_time;						//执行背景提取的时间点
 	int save_img_time;				//执行图片保存的时间点
 	int temp_update_time;			//执行temp update的时间点
 	int iDiffNum;
+	char Stored_file_name[200];
 	my_client *client_to_DLServer;
 	char ip_addr[20];
 	char port[20];
