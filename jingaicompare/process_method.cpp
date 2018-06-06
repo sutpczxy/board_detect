@@ -59,6 +59,7 @@ int move_target_detect::loop_process(cv::Mat current_pic)
 			{
 				img_input.copyTo(img_temp);
 				temp_update_time = clock();	
+				alert_count=0;
 			}
 			if(alert_count>=10)
 			{
