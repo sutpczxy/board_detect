@@ -9,6 +9,7 @@ move_target_detect::move_target_detect()
 	//bgs = new SuBSENSE();		/* Background Subtraction Methods */
 	frame_count = 0;
 	alert_count = 0;
+	disappear_count=0;
 	start_time = clock();
 	save_img_time = clock();
 	temp_update_time = clock();
@@ -54,17 +55,24 @@ int move_target_detect::loop_process(cv::Mat current_pic)
 		diff_flag+=getPSNR(img_temp,img_input);
 		if(diff_flag)
 		{
-			if(dt3>5)
+			if(alert_count<10&&dt3>10)
 			{
 				img_input.copyTo(img_temp);
 				temp_update_time = clock();	
 			}
-			if(alert_count>10)
+			if(alert_count>=10)
 			{
-				send_img_socket(0x02);
-				save_flag=2;
+				disappear_count++;
+				if(disappear_count==10)
+				{
+					img_input.copyTo(img_temp);
+					temp_update_time = clock();	
+					send_img_socket(0x02);
+					save_flag=2;
+					disappear_count=0;
+					alert_count=0;
+				}
 			}
-			alert_count=0;
 		}
 		else{
 			alert_count++;
@@ -110,6 +118,7 @@ int move_target_detect::loop_process(cv::Mat current_pic)
 			//if (dt2 > 60 && bkg_flag==1)
 			send_img_socket(0x01);
 			save_flag=1;
+			alert_count++;
 		}
 		start_time = clock();
 	}
@@ -120,7 +129,11 @@ int move_target_detect::loop_process(cv::Mat current_pic)
 
 cv::Mat move_target_detect::get_ROI(cv::Mat srcImage)
 {
-	cv::Mat ImageROI = srcImage(cv::Rect(870, 540, 80, 80));
+	int w1=int(srcImage.cols*0.425);
+	int w2=int(srcImage.rows*0.352);
+	int w3=int(srcImage.cols*0.039);
+	int w4=int(srcImage.rows*0.052);
+	cv::Mat ImageROI = srcImage(cv::Rect(w1, w2, w3, w4));
 	//imshow("img", ImageROI);
 	//cvWaitKey(0);
 	//cvDestroyWindow("img");
@@ -228,7 +241,11 @@ int move_target_detect::send_img_socket(char status)
 	Mat img_output;
 	if(status==0x01)
 	{
-		rectangle(img_input, cv::Rect(870, 540, 80, 80), CV_RGB(0, 255, 30), 3, 1, 0);
+		int w1=int(img_input.cols*0.425);
+		int w2=int(img_input.rows*0.352);
+		int w3=int(img_input.cols*0.039);
+		int w4=int(img_input.rows*0.052);
+		rectangle(img_input, cv::Rect(w1, w2, w3, w4), CV_RGB(0, 255, 30), 3, 1, 0);
 	}
 	imwrite(Save_file_name, img_input);
 
@@ -290,8 +307,8 @@ double move_target_detect::getPSNR(cv::Mat temp_img, cv::Mat curr_img)
 
 	tmp_ROI = get_ROI(temp_img);
 	cur_ROI = get_ROI(curr_img);
-	imshow("tmp", tmp_ROI);
-	imshow("cur", cur_ROI);
+	// imshow("tmp", tmp_ROI);
+	// imshow("cur", cur_ROI);
 
     Mat s1; 
     absdiff(tmp_ROI, cur_ROI, s1);       // |I1 - I2|
