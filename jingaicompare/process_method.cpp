@@ -22,6 +22,7 @@ move_target_detect::move_target_detect()
 
 int move_target_detect::loop_process(cv::Mat current_pic)
 {
+	//imshow("tmp", current_pic);
 	current_pic.copyTo(img_input);
 	if (img_input.empty())
 	{
